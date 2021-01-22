@@ -1,0 +1,449 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "authenticationType": {
+            "type": "string",
+            "defaultValue": "password",
+            "allowedValues": [
+                "sshPublicKey",
+                "password"
+            ],
+            "metadata": {
+                "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+            }
+        },
+        "ppdmCommonPassword": {
+            "type": "securestring",
+            "defaultValue": "Change_Me12345_",
+            "metadata": {
+                "description": "The password for DDVE user."
+            }
+        },
+        "ppdmVersion": {
+            "type": "string",
+            "defaultValue": "19.6.03",
+            "metadata": {
+                "description": "The ppdm Version."
+            }
+        },
+        "ppdmImageURI": {
+            "type": "string",
+            "defaultValue": "https://opsmanagerimage.blob.local.azurestack.external/images/powerprotect/",
+            "metadata": {
+                "description": "Local Uri of the Operations Manager VHD to create Custom image from"
+            }
+        },
+        "ppdmName": {
+            "type": "string",
+            "defaultValue": "ppdmazs1",
+            "maxLength": 10,
+            "metadata": {
+                "description": "Name of the DDVE virtual machine"
+            }
+        },
+        "domainname": {
+            "type": "string",
+            "defaultValue": "azsdps.labbuildr.com",
+            "maxLength": 240,
+            "metadata": {
+                "description": "Custom Domain with reverse dns for for PPDM"
+            }
+        },        
+        "ppdmNetworkInterfaceType": {
+            "type": "string",
+            "defaultValue": "Public",
+            "metadata": {
+                "description": "Do we want to Connect PPDM with Public IP ?"
+            },
+            "allowedValues": [
+                "Public",
+                "Private"
+            ]
+        },
+
+        "ppdmPasswordOrKey": {
+            "type": "securestring",
+            "defaultValue": "Change_Me12345_",
+            "metadata": {
+                "description": "The password for DDVE Settings."
+            }
+        },
+        "diagnosticsStorageAccountExistingResourceGroup": {
+            "type": "string",
+            "defaultValue": "registry",
+            "metadata": {
+                "description": "The name of the Resource Group which contains the existing storage account to be used by diagnostics."
+            }
+        },
+        "diagnosticsStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Storage account to be used by diagnostics. Diagnostics supports only Standard_GRS,Standard_LRS,Standard_RAGRS storage account types."
+            }
+        },
+        "vnetExistingResourceGroup": {
+            "type": "string",
+            "defaultValue": "registry",
+            "metadata": {
+                "description": "The name of the Resource Group which contains the existing Virtual Network that NVE/DDVE will be connected to."
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "defaultValue": "harborVNET",
+            "metadata": {
+                "description": "The name of the existing Virtual Network that DDVE will be connected to."
+            }
+        },
+        "vnetSubnetName": {
+            "type": "string",
+            "defaultValue": "Subnet1",
+            "metadata": {
+                "description": "The name of the existing subnet that DDVE will be connected to."
+            }
+        }
+    },
+    "variables": {
+        "apiVersion": "2017-06-01",
+        "ppdmUsername": "sysadmin",
+        "ppdmIPAllocationMethod": "Static",
+        "ppdmNicName": "[concat(parameters('ppdmName'), '-nic-0')]",
+        "ppdmNsg": "[concat(parameters('ppdmName'), '-nsg')]",
+        "ppdmOSDisk": "[concat(parameters('ppdmName'), '-osdisk')]",
+        "numDataDisks": 6,
+        "ppdmDataDisk": "[concat(parameters('ppdmName'), '-datadisk')]",
+        "ppdmPublicIP": {
+            "id": "[resourceId('Microsoft.Network/publicIPAddresses',Concat(variables('ppdmNicName'),'-pip'))]"
+        },
+        "ppdmPublicIPName": "[concat(variables('ppdmNicName'),'-pip')]",
+        "ppdmVersion": "[concat('ppdm',parameters('ppdmVersion'))]",
+        "ppdmVmSize": "Standard_DS4_v2",
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', variables('ppdmUserName'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('ppdmPasswordOrKey')]"
+                    }
+                ]
+            }
+        },
+        "subnetId": "[concat(variables('vnetId'), '/subnets/', parameters('vnetSubnetName'))]",
+        "vnetId": "[resourceId(parameters('vnetExistingResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('ppdmName')]",
+            "apiVersion": "2017-03-30",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('ppdmVmSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "id": "[resourceId('Microsoft.Compute/images', variables('ppdmVersion'))]"
+                    },
+                    "osDisk": {
+                        "name": "[variables('ppdmOSDisk')]",
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "copy": [
+                        {
+                            "name": "dataDisks",
+                            "count": "[variables('numDataDisks')]",
+                            "input": {
+                                "caching": "None",
+                                "lun": "[copyIndex('dataDisks')]",
+                                "name": "[concat(variables('ppdmDataDisk'), copyIndex('dataDisks'))]",
+                                "managedDisk": {
+                                    "storageAccountType": "Standard_LRS"
+                                },
+                                "createOption": "FromImage"
+                            }
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[concat(parameters('domainname'),parameters('ppdmName'))]",
+                    "adminUsername": "[variables('ppdmUserName')]",
+                    "adminPassword": "[parameters('ppdmCommonPassword')]",
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('ppdmNicName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(resourceId(parameters('diagnosticsStorageAccountExistingResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), variables('apiVersion')).primaryEndpoints['blob']]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('ppdmNicName'))]",
+                "[concat('Microsoft.Compute/images/', variables('ppdmVersion'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[variables('ppdmNicName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('ppdmNsg'))]",
+                "[concat('Microsoft.Network/publicIPAddresses/', variables('ppdmNicName'),'-pip')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            },
+                            "privateIPAddressVersion": "IPv4",
+                            "publicIPAddress": "[if(equals(parameters('ppdmNetworkInterfaceType'),'Public'), variables('ppdmPublicIP'), json('null'))]"
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('ppdmNsg'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[variables('ppdmNsg')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "TCP_inbound_rule_1",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "9000-9001",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [
+                            ],
+                            "destinationAddressPrefixes": [
+                            ]
+                        }
+                    },
+                    {
+                        "name": "TCP_inbound_rule_2",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8080",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1010,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [
+                            ],
+                            "destinationAddressPrefixes": [
+                            ]
+                        }
+                    },
+                    {
+                        "name": "TCP_inbound_rule_3",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1030,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [
+                            ],
+                            "destinationAddressPrefixes": [
+                            ]
+                        }
+                    },
+                    {
+                        "name": "TCP_inbound_rule_4",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "9090",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1060,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [
+                            ],
+                            "destinationAddressPrefixes": [
+                            ]
+                        }
+                    },
+                    {
+                        "name": "TCP_inbound_rule_5",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1100,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [
+                            ],
+                            "destinationAddressPrefixes": [
+                            ]
+                        }
+                    },
+                    {
+                        "name": "TCP_inbound_rule_6",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "7937-7954",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1150,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [
+                            ],
+                            "destinationAddressPrefixes": [
+                            ]
+                        }
+                    },
+                    {
+                        "name": "TCP_outbound_rule_1",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Outbound",
+                            "sourceAddressPrefixes": [
+                            ],
+                            "destinationAddressPrefixes": [
+                            ]
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+            ]
+        },
+        {
+            "apiVersion": "2017-04-01",
+            "condition": "[equals(parameters('ppdmNetworkInterfaceType'),'Public')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('ppdmPublicIPName')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[Concat(variables('ppdmNicName'),'-pip')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "[variables('ppdmIPAllocationMethod')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('ppdmName')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/images",
+            "apiVersion": "2017-12-01",
+            "name": "[variables('ppdmVersion')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "provisioner": "dps_ppdm_azurestack_template"
+            },
+            "properties": {
+                "storageProfile": {
+                    "osDisk": {
+                        "osType": "Linux",
+                        "osState": "Generalized",
+                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk1.vhd')]",
+                        "storageAccountType": "Standard_LRS",
+                        "caching": "ReadWrite",
+                        "diskSizeGB": 128
+                    },
+            	    "dataDisks": [
+                        {
+                        "lun": 0,
+                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk2.vhd')]",
+                        "storageAccountType": "Standard_LRS",
+                        "caching": "ReadWrite",
+                        "diskSizeGB": 500
+                        },
+                        {
+                        "lun": 1,
+                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk3.vhd')]",
+                        "storageAccountType": "Standard_LRS",
+                        "caching": "ReadWrite",
+                        "diskSizeGB": 10
+                        },
+                        {
+                        "lun": 2,
+                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk4.vhd')]",
+                        "storageAccountType": "Standard_LRS",
+                        "caching": "ReadWrite",
+                        "diskSizeGB": 10
+                        },
+                        {
+                        "lun": 3,
+                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk5.vhd')]",
+                        "storageAccountType": "Standard_LRS",
+                        "caching": "ReadWrite",
+                        "diskSizeGB": 5
+                        },
+                        {
+                        "lun": 4,
+                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk6.vhd')]",
+                        "storageAccountType": "Standard_LRS",
+                        "caching": "ReadWrite",
+                        "diskSizeGB": 5
+                        },
+                        {
+                        "lun": 5,
+                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk7.vhd')]",
+                        "storageAccountType": "Standard_LRS",
+                        "caching": "ReadWrite",
+                        "diskSizeGB": 5
+                        }
+                    ]                    
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "Notes": {
+            "type": "string",
+            "value": "PPDM Installation System is now running. Please go to below URL"
+        },
+        "DDVEUrl": {
+            "type": "string",
+            "value": "[concat('https://', reference(variables('ppdmNicName')).ipConfigurations[0].properties.privateIPAddress, '/#/fresh')]"
+        }
+    }
+}

@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "authenticationType": {
+            "value": "sshPublicKey"
+        },
+        "ppdmCommonPassword": {
+            "value": "Change_Me12345_"
+        },
+        "ppdmVersion": {
+            "value": "19.6.07"
+        },
+        "ppdmImageURI": {
+            "value": "https://opsmanagerimage.blob.local.azurestack.external/images/powerprotect/"
+        },
+        "ppdmName": {
+            "value": "ppdmazs1"
+        },
+        "ppdmNetworkInterfaceType": {
+            "value": "Public"
+        },
+        "ppdmPasswordOrKey": {
+            "value": "Change_Me12345_"
+        },
+        "diagnosticsStorageAccountExistingResourceGroup": {
+            "value": "registry"
+        },
+        "diagnosticsStorageAccountName": {
+            "value": "o6xnpfa6ngy3isalinuxvm"
+        },
+        "vnetExistingResourceGroup": {
+            "value": "registry"
+        },
+        "vnetName": {
+            "value": "harborVNET"
+        },
+        "vnetSubnetName": {
+            "value": "Subnet1"
+        }
+    }
+}
