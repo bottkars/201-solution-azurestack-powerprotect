@@ -9,10 +9,10 @@
             "value": "Change_Me12345_"
         },
         "ppdmVersion": {
-            "value": "19.6.07"
+            "value": "19.7.07"
         },
         "ppdmImageURI": {
-            "value": "https://opsmanagerimage.blob.local.azurestack.external/images/powerprotect/"
+            "value": "https://opsmanagerimage.blob.local.azurestack.external/images/PPDM/19-7.07/"
         },
         "ppdmName": {
             "value": "ppdmazs1"
