@@ -84,7 +84,23 @@ az group delete --name ppdm_from_cli  -y
 
 
 ## GitOps from direnv
+validate
+```bash
+az group create --name ${AZS_RESOURCE_GROUP} \
+  --location ${AZS_LOCATION}
+az deployment group validate  \
+--template-uri https://raw.githubusercontent.com/bottkars/201-solution-azurestack-powerprotect/main/azuredeploy.json \
+--parameters https://raw.githubusercontent.com/bottkars/201-solution-azurestack-powerprotect/main/azuredeploy.parameters.json \
+--parameters ppdmName=${AZS_HOSTNAME:?variable is empty} \
+--parameters ppdmImageURI=${AZS_IMAGE_URI:?variable is empty} \
+--parameters ppdmVersion=${AZS_IMAGE:?variable is empty} \
+--parameters diagnosticsStorageAccountExistingResourceGroup=${AZS_diagnosticsStorageAccountExistingResourceGroup:?variable is empty} \
+--parameters diagnosticsStorageAccountName=${AZS_diagnosticsStorageAccountName:?variable is empty} \
+--parameters vnetName=${AZS_vnetName:?variable is empty} \
+--parameters vnetSubnetName=${AZS_vnetSubnetName:?variable is empty} \
+--resource-group ${AZS_RESOURCE_GROUP:?variable is empty}
 
+deploy
 ```bash
 az group create --name ${AZS_RESOURCE_GROUP} \
   --location ${AZS_LOCATION}
@@ -99,6 +115,7 @@ az deployment group create  \
 --parameters vnetName=${AZS_vnetName:?variable is empty} \
 --parameters vnetSubnetName=${AZS_vnetSubnetName:?variable is empty} \
 --resource-group ${AZS_RESOURCE_GROUP:?variable is empty}
+```
 
 ```bash
 # HAcking the Deployment
