@@ -99,6 +99,7 @@ az deployment group validate  \
 --parameters vnetName=${AZS_vnetName:?variable is empty} \
 --parameters vnetSubnetName=${AZS_vnetSubnetName:?variable is empty} \
 --resource-group ${AZS_RESOURCE_GROUP:?variable is empty}
+```
 
 deploy
 ```bash
