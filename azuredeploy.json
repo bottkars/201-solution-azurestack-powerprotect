@@ -171,7 +171,7 @@
                     ]
                 },
                 "osProfile": {
-                    "computerName": "[concat(parameters('domainname'),parameters('ppdmName'))]",
+                    "computerName": "[concat(parameters('ppdmName'),'.',parameters('domainname'))]",
                     "adminUsername": "[variables('ppdmUserName')]",
                     "adminPassword": "[parameters('ppdmCommonPassword')]",
                     "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
