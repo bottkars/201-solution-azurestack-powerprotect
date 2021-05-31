@@ -91,6 +91,7 @@ az group create --name ${AZS_RESOURCE_GROUP} \
 az deployment group validate  \
 --template-uri https://raw.githubusercontent.com/bottkars/201-solution-azurestack-powerprotect/main/azuredeploy.json \
 --parameters https://raw.githubusercontent.com/bottkars/201-solution-azurestack-powerprotect/main/azuredeploy.parameters.json \
+--parameters ppdmPasswordOrKey="${SSH_KEYDATA}" \
 --parameters ppdmName=${AZS_HOSTNAME:?variable is empty} \
 --parameters ppdmImageURI=${AZS_IMAGE_URI:?variable is empty} \
 --parameters ppdmVersion=${AZS_IMAGE:?variable is empty} \
@@ -108,6 +109,7 @@ az group create --name ${AZS_RESOURCE_GROUP} \
 az deployment group create  \
 --template-uri https://raw.githubusercontent.com/bottkars/201-solution-azurestack-powerprotect/main/azuredeploy.json \
 --parameters https://raw.githubusercontent.com/bottkars/201-solution-azurestack-powerprotect/main/azuredeploy.parameters.json \
+--parameters ppdmPasswordOrKey="${SSH_KEYDATA}" \
 --parameters ppdmName=${AZS_HOSTNAME:?variable is empty} \
 --parameters ppdmImageURI=${AZS_IMAGE_URI:?variable is empty} \
 --parameters ppdmVersion=${AZS_IMAGE:?variable is empty} \
