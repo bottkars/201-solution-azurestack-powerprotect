@@ -49,7 +49,7 @@
             "metadata": {
                 "description": "Custom Domain with reverse dns for for PPDM"
             }
-        },        
+        },
         "ppdmNetworkInterfaceType": {
             "type": "string",
             "defaultValue": "Public",
@@ -348,9 +348,7 @@
                             "destinationAddressPrefixes": [
                             ]
                         }
-                    }                    
-
-
+                    }
                 ]
             },
             "dependsOn": [
@@ -390,50 +388,50 @@
                         "caching": "ReadWrite",
                         "diskSizeGB": 128
                     },
-            	    "dataDisks": [
+                    "dataDisks": [
                         {
-                        "lun": 0,
-                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk2.vhd')]",
-                        "storageAccountType": "Standard_LRS",
-                        "caching": "ReadWrite",
-                        "diskSizeGB": 500
+                            "lun": 0,
+                            "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk2.vhd')]",
+                            "storageAccountType": "Standard_LRS",
+                            "caching": "ReadWrite",
+                            "diskSizeGB": 500
                         },
                         {
-                        "lun": 1,
-                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk3.vhd')]",
-                        "storageAccountType": "Standard_LRS",
-                        "caching": "ReadWrite",
-                        "diskSizeGB": 10
+                            "lun": 1,
+                            "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk3.vhd')]",
+                            "storageAccountType": "Standard_LRS",
+                            "caching": "ReadWrite",
+                            "diskSizeGB": 10
                         },
                         {
-                        "lun": 2,
-                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk4.vhd')]",
-                        "storageAccountType": "Standard_LRS",
-                        "caching": "ReadWrite",
-                        "diskSizeGB": 10
+                            "lun": 2,
+                            "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk4.vhd')]",
+                            "storageAccountType": "Standard_LRS",
+                            "caching": "ReadWrite",
+                            "diskSizeGB": 10
                         },
                         {
-                        "lun": 3,
-                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk5.vhd')]",
-                        "storageAccountType": "Standard_LRS",
-                        "caching": "ReadWrite",
-                        "diskSizeGB": 5
+                            "lun": 3,
+                            "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk5.vhd')]",
+                            "storageAccountType": "Standard_LRS",
+                            "caching": "ReadWrite",
+                            "diskSizeGB": 5
                         },
                         {
-                        "lun": 4,
-                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk6.vhd')]",
-                        "storageAccountType": "Standard_LRS",
-                        "caching": "ReadWrite",
-                        "diskSizeGB": 5
+                            "lun": 4,
+                            "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk6.vhd')]",
+                            "storageAccountType": "Standard_LRS",
+                            "caching": "ReadWrite",
+                            "diskSizeGB": 5
                         },
                         {
-                        "lun": 5,
-                        "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk7.vhd')]",
-                        "storageAccountType": "Standard_LRS",
-                        "caching": "ReadWrite",
-                        "diskSizeGB": 5
+                            "lun": 5,
+                            "blobUri": "[concat(parameters('ppdmImageURI'),'powerprotect-disk7.vhd')]",
+                            "storageAccountType": "Standard_LRS",
+                            "caching": "ReadWrite",
+                            "diskSizeGB": 5
                         }
-                    ]                    
+                    ]
                 }
             }
         }
