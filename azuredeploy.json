@@ -239,7 +239,7 @@
                             "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
-                            "priority": 1000,
+                            "priority": 1010,
                             "direction": "Inbound",
                             "sourceAddressPrefixes": [
                             ],
@@ -256,7 +256,7 @@
                             "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
-                            "priority": 1010,
+                            "priority": 1020,
                             "direction": "Inbound",
                             "sourceAddressPrefixes": [
                             ],
@@ -290,6 +290,40 @@
                             "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
+                            "priority": 1040,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [
+                            ],
+                            "destinationAddressPrefixes": [
+                            ]
+                        }
+                    },
+                    {
+                        "name": "TCP_inbound_rule_5",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1050,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [
+                            ],
+                            "destinationAddressPrefixes": [
+                            ]
+                        }
+                    },
+                    {
+                        "name": "TCP_inbound_rule_6",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "14443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
                             "priority": 1060,
                             "direction": "Inbound",
                             "sourceAddressPrefixes": [
@@ -297,7 +331,26 @@
                             "destinationAddressPrefixes": [
                             ]
                         }
-                    }
+                    },
+                    {
+                        "name": "TCP_inbound_rule_7",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "9009",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1070,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": [
+                            ],
+                            "destinationAddressPrefixes": [
+                            ]
+                        }
+                    }                    
+
+
                 ]
             },
             "dependsOn": [
