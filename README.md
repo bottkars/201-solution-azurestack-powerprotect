@@ -84,6 +84,7 @@ az group delete --name ppdm_from_cli  -y
 
 
 ## GitOps from direnv
+
 validate
 ```bash
 az group create --name ${AZS_RESOURCE_GROUP} \
