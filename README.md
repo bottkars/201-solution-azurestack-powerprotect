@@ -11,7 +11,7 @@ Prework and Requirements:
 for ((i =1; i <= 7; i++)); do
   qemu-img convert -f vmdk -o subformat=fixed,force_size -O vpc powerprotect-disk$i.vmdk powerprotect-disk$i.vhd
 done
-az storage blob upload-batch --account-name opsmanagerimage -d images --destination-path powerprotect --source /home/bottk/workspace/azurestack_source_ppdm/ --pattern "powerprotect-disk*.vhd"
+az storage blob upload-batch --account-name opsmanagerimage -d images --destination-path powerprotect/${AZS_IMAGE}/ --source /home/bottk/workspace/  --pattern "powerprotect-disk*.vhd"
 ```
 ## upload  VHD Example
 ```bash
